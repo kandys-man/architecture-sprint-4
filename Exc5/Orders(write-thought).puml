@@ -1,0 +1,44 @@
+@startuml
+title Кэширование заказов в ShopDb (write-thought)
+
+actor customer  as "Customer"
+actor partner  as "API User"
+actor sreller as "Seller"
+
+participant ishop as "Internet Shop"
+participant shopApi as "Shop API"
+participant crm as "CRM"
+participant crmApi as "CRM API"
+
+participant cache as "Кэш"
+participant shopDB as "ShopDB"
+
+== Создание заказа ==
+customer->ishop : отправка нового заказа
+ishop -> shopApi : отправка нового заказа
+partner -> shopApi : отправка нового заказа
+
+shopApi -> cache : отправка нового заказа
+cache -> cache : добавление заказа
+cache -> shopDB : добавление заказа
+shopDB --> cache : заказ записан
+cache --> shopApi : заказ записан
+
+shopApi --> ishop : 200
+ishop --> customer : заказ принят
+shopApi --> partner : 200
+
+== Получение заказа ==
+
+customer->ishop : получить список заказов
+ishop -> shopApi :  получить список заказов
+partner -> shopApi : получить список заказов
+
+shopApi -> cache : получить список заказов
+cache --> shopApi : список заказов
+
+shopApi --> ishop : список заказов
+ishop --> customer : список заказов
+shopApi --> partner : список заказов
+
+@enduml
